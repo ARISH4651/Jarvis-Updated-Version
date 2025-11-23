@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JARVIS | HUD OS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Orbitron:wght@400;700;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="hud-container">
+        <!-- Background Particles -->
+        <canvas id="particles-canvas"></canvas>
+        <!-- Background Grid/Effect -->
+        <div class="bg-grid"></div>
+        <div class="scan-line"></div>
+
+        <!-- Top Bar (Date/Time & Status) -->
+        <div class="top-bar">
+            <div class="shield-logo">S.H.I.E.L.D. OS v12.1</div>
+            <div class="notification-zone" id="notification-zone">
+                <!-- Notifications appear here -->
+            </div>
+            <div class="date-time-group">
+                <div id="date">NOV 10 SATURDAY</div>
+                <div id="clock">02:02:00</div>
+            </div>
+        </div>
+
+        <!-- Center Arc Reactor (The Core) -->
+        <div class="arc-reactor-container" id="arc-reactor">
+            <div class="outer-ring"></div>
+            <div class="inner-ring"></div>
+            <div class="core-circle">
+                <span id="core-text">22</span>
+            </div>
+            <div class="rotating-ticks"></div>
+        </div>
+
+        <!-- Left Panel: System Stats (Overlay) -->
+        <div id="system-overlay" class="hud-panel left-panel hidden">
+            <div class="panel-header">SYSTEM DIAGNOSTICS</div>
+
+            <div class="stat-row">
+                <span class="label">CPU LOAD</span>
+                <div class="bar-frame">
+                    <div class="bar" id="cpu-bar" style="width: 0%"></div>
+                </div>
+                <span class="value" id="cpu-val">0%</span>
+            </div>
+            <div class="mini-graph" id="cpu-graph">
+                <svg width="100%" height="30">
+                    <polyline id="cpu-polyline" points=""
+                        style="fill:none;stroke:var(--primary-color);stroke-width:1" />
+                </svg>
+            </div>
+
+            <div class="stat-row">
+                <span class="label">RAM USAGE</span>
+                <div class="bar-frame">
+                    <div class="bar" id="ram-bar" style="width: 0%"></div>
+                </div>
+                <span class="value" id="ram-val">0%</span>
+            </div>
+
+            <div class="stat-row">
+                <span class="label">GPU TEMP</span>
+                <div class="bar-frame">
+                    <div class="bar" id="gpu-bar" style="width: 0%"></div>
+                </div>
+                <span class="value" id="gpu-val">0°C</span>
+            </div>
+        </div>
+
+        <!-- Right Side: Chat Panel -->
+        <div class="chat-panel">
+            <div class="chat-header">COMMAND INTERFACE</div>
+
+            <div class="chat-history" id="chat-history">
+                <!-- Messages appear here -->
+            </div>
+
+            <div class="chat-input-area">
+                <div class="voice-container">
+                    <div class="voice-activator" id="voice-btn">
+                        <div class="mic-icon">🎤</div>
+                    </div>
+                    <div class="waveform" id="voice-waveform">
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                    </div>
+                </div>
+
+                <input type="text" id="command-input" placeholder="Awaiting Directive..." autocomplete="off">
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
