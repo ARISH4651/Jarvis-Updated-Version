@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ------------------- TTS (Male Voice) -------------------
     const speak = (text) => {
         if (!('speechSynthesis' in window)) return;
-        window.speechSynthesis.cancel();
+        window.speechSynthesis.cancel(); // Interrupt current speech
         const utterance = new SpeechSynthesisUtterance(text);
         const voices = window.speechSynthesis.getVoices();
         const maleNames = [
@@ -119,9 +119,24 @@ document.addEventListener('DOMContentLoaded', () => {
         window.speechSynthesis.speak(utterance);
     };
 
+    const stopSpeaking = () => {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            waveform.classList.remove('active');
+        }
+    };
+
     // ------------------- Command Handling -------------------
     const handleCommand = async (cmd) => {
         const command = cmd.toLowerCase().trim();
+
+        // Interrupt Handling
+        if (command === 'stop' || command === 'silence' || command === 'quiet' || command === 'shut up') {
+            stopSpeaking();
+            showNotification('AUDIO STOPPED');
+            return;
+        }
+
         // System overlay commands
         if (command.includes('show system') || command.includes('system performance') || command.includes('status')) {
             systemOverlay.classList.remove('hidden');
@@ -132,6 +147,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (command.includes('hide system') || command.includes('close system')) {
             systemOverlay.classList.add('hidden');
             speak('Closing diagnostics.');
+            return;
+        }
+
+        // Vitals overlay commands
+        const vitalsOverlay = document.getElementById('vitals-overlay');
+        if (command.includes('show vitals') || command.includes('check vitals') || command.includes('biometrics')) {
+            vitalsOverlay.classList.remove('hidden');
+            speak('Displaying biometric data.');
+            showNotification('VITALS OVERLAY ACTIVE');
+            return;
+        }
+        if (command.includes('hide vitals') || command.includes('close vitals')) {
+            vitalsOverlay.classList.add('hidden');
+            speak('Closing biometric monitor.');
             return;
         }
         // General commands – forward to backend
@@ -169,23 +198,55 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     input.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendCommand(); });
 
-    // ------------------- Voice Recognition -------------------
+    // ------------------- Voice Recognition (Enhanced) -------------------
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
         const recognition = new SpeechRecognition();
         recognition.lang = 'en-US';
+        recognition.continuous = false; // Set to false for command-based interaction, true for dictation
+        recognition.interimResults = true; // Enable real-time feedback
+
+        let isListening = false;
+
         voiceBtn.addEventListener('click', () => {
-            recognition.start();
+            if (isListening) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        });
+
+        recognition.onstart = () => {
+            isListening = true;
             voiceBtn.classList.add('listening');
             showNotification('LISTENING...');
-        });
-        recognition.onresult = (event) => {
-            const text = event.results[0][0].transcript;
-            input.value = text;
-            voiceBtn.classList.remove('listening');
-            sendCommand();
         };
-        recognition.onend = () => voiceBtn.classList.remove('listening');
+
+        recognition.onresult = (event) => {
+            const transcript = Array.from(event.results)
+                .map(result => result[0].transcript)
+                .join('');
+
+            input.value = transcript;
+
+            // If final result, send command
+            if (event.results[0].isFinal) {
+                sendCommand();
+            }
+        };
+
+        recognition.onend = () => {
+            isListening = false;
+            voiceBtn.classList.remove('listening');
+            // Auto-restart if in continuous mode (optional, can be toggled via command)
+            // recognition.start(); 
+        };
+
+        recognition.onerror = (event) => {
+            console.error("Speech recognition error", event.error);
+            isListening = false;
+            voiceBtn.classList.remove('listening');
+        };
     }
 
     // ------------------- System Stats -------------------
@@ -233,6 +294,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 gpuBar.style.width = `${data.gpu.load}%`;
                 gpuBar.className = `bar ${getColorClass(data.gpu.load)}`;
                 document.getElementById('gpu-val').textContent = `${data.gpu.temperature}°C`;
+            }
+            // Vitals
+            if (data.vitals) {
+                document.getElementById('bpm-val').textContent = `${data.vitals.bpm} BPM`;
+                document.getElementById('spo2-val').textContent = `${data.vitals.spo2}%`;
+                document.getElementById('stress-val').textContent = `${data.vitals.stress}%`;
+
+                document.getElementById('spo2-bar').style.width = `${data.vitals.spo2}%`;
+                document.getElementById('stress-bar').style.width = `${data.vitals.stress}%`;
             }
             // Core pulse
             document.getElementById('core-text').textContent = Math.floor(cpuVal);

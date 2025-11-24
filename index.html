@@ -81,6 +81,37 @@
             </div>
         </div>
 
+        <!-- Right Panel: Biometric Vitals -->
+        <div id="vitals-overlay" class="hud-panel right-panel hidden">
+            <div class="panel-header">BIOMETRIC VITALS</div>
+
+            <div class="stat-row">
+                <span class="label">HEART RATE</span>
+                <span class="value" id="bpm-val">-- BPM</span>
+            </div>
+            <div class="mini-graph" id="bpm-graph">
+                <svg width="100%" height="30">
+                    <polyline id="bpm-polyline" points="" style="fill:none;stroke:var(--alert-color);stroke-width:1" />
+                </svg>
+            </div>
+
+            <div class="stat-row">
+                <span class="label">OXYGEN (SpO2)</span>
+                <div class="bar-frame">
+                    <div class="bar" id="spo2-bar" style="width: 0%; background: var(--secondary-color);"></div>
+                </div>
+                <span class="value" id="spo2-val">--%</span>
+            </div>
+
+            <div class="stat-row">
+                <span class="label">STRESS LVL</span>
+                <div class="bar-frame">
+                    <div class="bar" id="stress-bar" style="width: 0%; background: orange;"></div>
+                </div>
+                <span class="value" id="stress-val">--%</span>
+            </div>
+        </div>
+
         <!-- Chat Overlay (Direct on screen) -->
         <div class="chat-overlay" id="chat-history">
             <!-- Messages appear here as overlays -->
