@@ -113,73 +113,160 @@ body {
 }
 
 /* Arc Reactor (Center) */
-.arc-reactor-container {
+.arc-reactor {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 400px;
-    height: 400px;
+    width: 500px;
+    height: 500px;
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 5;
+    pointer-events: none;
 }
 
-.outer-ring {
+.reactor-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Outer Ring - Thick Segments */
+.reactor-outer-ring {
     position: absolute;
     width: 100%;
     height: 100%;
-    border: 2px dashed var(--primary-color);
     border-radius: 50%;
-    animation: spin 20s linear infinite;
-    opacity: 0.5;
+    border: 4px solid transparent;
+    border-top: 4px solid var(--primary-color);
+    border-bottom: 4px solid var(--primary-color);
+    box-shadow: 0 0 20px var(--primary-color), inset 0 0 20px var(--primary-color);
+    animation: spin 15s linear infinite;
 }
 
-.inner-ring {
+.reactor-outer-ring::before {
+    content: '';
     position: absolute;
-    width: 80%;
-    height: 80%;
-    border: 10px solid rgba(0, 243, 255, 0.1);
-    border-top: 10px solid var(--primary-color);
-    border-bottom: 10px solid var(--primary-color);
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
     border-radius: 50%;
+    border: 2px solid transparent;
+    border-left: 4px solid var(--primary-color);
+    border-right: 4px solid var(--primary-color);
     animation: spin-reverse 10s linear infinite;
-    box-shadow: 0 0 30px rgba(0, 243, 255, 0.2);
 }
 
-.core-circle {
+/* Dashed Ring */
+.reactor-dashed-ring {
+    position: absolute;
+    width: 85%;
+    height: 85%;
+    border-radius: 50%;
+    border: 2px dashed rgba(0, 243, 255, 0.5);
+    animation: spin 30s linear infinite;
+}
+
+/* Dotted Ring */
+.reactor-dotted-ring {
+    position: absolute;
+    width: 70%;
+    height: 70%;
+    border-radius: 50%;
+    border: 4px dotted var(--primary-color);
+    animation: spin-reverse 20s linear infinite;
+    opacity: 0.7;
+}
+
+/* Inner Ring */
+.reactor-inner-ring {
+    position: absolute;
+    width: 55%;
+    height: 55%;
+    border-radius: 50%;
+    border: 6px solid var(--primary-color);
+    box-shadow: 0 0 30px var(--primary-color);
+    animation: pulse-glow 2s infinite alternate;
+}
+
+/* Core */
+.reactor-core {
+    position: absolute;
     width: 40%;
     height: 40%;
-    background: radial-gradient(circle, rgba(0, 243, 255, 0.2) 0%, transparent 70%);
-    border: 2px solid var(--primary-color);
     border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 243, 255, 0.3) 0%, transparent 70%);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 50px var(--primary-color);
+    border: 1px solid rgba(0, 243, 255, 0.5);
 }
 
-#core-text {
+.core-text {
     font-family: var(--font-tech);
-    font-size: 48px;
-    animation: pulse 2s infinite ease-in-out;
+    font-size: 32px;
+    font-weight: 900;
+    letter-spacing: 4px;
+    color: #fff;
+    text-shadow: 0 0 10px var(--primary-color), 0 0 20px var(--primary-color);
+    animation: text-flicker 3s infinite;
 }
 
 @keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
     100% {
         transform: rotate(360deg);
     }
 }
 
 @keyframes spin-reverse {
+    0% {
+        transform: rotate(0deg);
+    }
+
     100% {
         transform: rotate(-360deg);
     }
 }
 
-@keyframes pulse {
+@keyframes pulse-glow {
+    0% {
+        box-shadow: 0 0 20px var(--primary-color);
+        opacity: 0.8;
+    }
+
+    100% {
+        box-shadow: 0 0 50px var(--primary-color);
+        opacity: 1;
+    }
+}
+
+@keyframes text-flicker {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
     50% {
-        opacity: 0.5;
+        opacity: 0.8;
+    }
+
+    52% {
+        opacity: 0.2;
+    }
+
+    54% {
+        opacity: 0.8;
     }
 }
 
@@ -297,22 +384,58 @@ body {
 }
 
 .chat-overlay {
-    max-height: 150px;
-    overflow-y: auto;
-    width: 100%;
-    text-align: center;
-    font-size: 14px;
-    text-shadow: 0 0 5px black;
+    position: absolute;
+    bottom: 150px;
+    left: 20px;
+    width: 500px;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    pointer-events: none;
+    z-index: 15;
 }
 
-.message.ai {
+.chat-overlay .message {
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    line-height: 1.4;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+    animation: fadeIn 0.3s ease-out;
+    max-width: 70%;
+}
+
+.chat-overlay .message.ai {
+    background: rgba(0, 243, 255, 0.15);
+    border-left: 3px solid var(--primary-color);
+    align-self: flex-start;
     color: var(--primary-color);
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
 }
 
-.message.user {
+.chat-overlay .message.user {
+    background: rgba(0, 102, 255, 0.15);
+    border-right: 3px solid var(--secondary-color);
+    align-self: flex-end;
     color: var(--secondary-color);
+    text-align: right;
+    box-shadow: 0 0 20px rgba(0, 102, 255, 0.3);
 }
 
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Voice Activator */
 .voice-activator {
     width: 50px;
     height: 50px;
@@ -482,4 +605,53 @@ body {
     margin-bottom: 10px;
     background: rgba(0, 0, 0, 0.3);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Bottom Input Area */
+.bottom-input {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    z-index: 10;
+}
+
+.voice-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+#command-input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 15px;
+    font-family: var(--font-tech);
+    font-size: 18px;
+    text-align: center;
+    border-radius: 30px;
+    outline: none;
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.1);
+}
+
+#command-input:focus {
+    box-shadow: 0 0 30px rgba(0, 243, 255, 0.3);
+}
+
+/* Hide scrollbars */
+*::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+html {
+    overflow: hidden !important;
 }

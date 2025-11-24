@@ -34,13 +34,16 @@
         </div>
 
         <!-- Center Arc Reactor (The Core) -->
-        <div class="arc-reactor-container" id="arc-reactor">
-            <div class="outer-ring"></div>
-            <div class="inner-ring"></div>
-            <div class="core-circle">
-                <span id="core-text">22</span>
+        <div class="arc-reactor" id="arc-reactor">
+            <div class="reactor-container">
+                <div class="reactor-outer-ring"></div>
+                <div class="reactor-dashed-ring"></div>
+                <div class="reactor-dotted-ring"></div>
+                <div class="reactor-inner-ring"></div>
+                <div class="reactor-core">
+                    <div class="core-text">J.A.R.V.I.S</div>
+                </div>
             </div>
-            <div class="rotating-ticks"></div>
         </div>
 
         <!-- Left Panel: System Stats (Overlay) -->
@@ -78,30 +81,26 @@
             </div>
         </div>
 
-        <!-- Right Side: Chat Panel -->
-        <div class="chat-panel">
-            <div class="chat-header">COMMAND INTERFACE</div>
+        <!-- Chat Overlay (Direct on screen) -->
+        <div class="chat-overlay" id="chat-history">
+            <!-- Messages appear here as overlays -->
+        </div>
 
-            <div class="chat-history" id="chat-history">
-                <!-- Messages appear here -->
-            </div>
-
-            <div class="chat-input-area">
-                <div class="voice-container">
-                    <div class="voice-activator" id="voice-btn">
-                        <div class="mic-icon">🎤</div>
-                    </div>
-                    <div class="waveform" id="voice-waveform">
-                        <div class="wave-bar"></div>
-                        <div class="wave-bar"></div>
-                        <div class="wave-bar"></div>
-                        <div class="wave-bar"></div>
-                        <div class="wave-bar"></div>
-                    </div>
+        <!-- Bottom: Command Input -->
+        <div class="bottom-input">
+            <div class="voice-container">
+                <div class="voice-activator" id="voice-btn">
+                    <div class="mic-icon">🎤</div>
                 </div>
-
-                <input type="text" id="command-input" placeholder="Awaiting Directive..." autocomplete="off">
+                <div class="waveform" id="voice-waveform">
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                </div>
             </div>
+            <input type="text" id="command-input" placeholder="Awaiting Directive..." autocomplete="off">
         </div>
     </div>
     <script src="script.js"></script>

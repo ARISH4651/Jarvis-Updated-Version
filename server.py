@@ -178,7 +178,8 @@ def command_handler():
         if query:
             result = brain.search(query)
             if result['status'] == 'success':
-                memory.set_context('last_search', result['data'])
+                # Store sources for context
+                memory.set_context('last_search', result.get('sources', []))
             response = result
         else:
             response = {"status": "error", "message": "What should I search for?"}
@@ -226,6 +227,10 @@ def command_handler():
         memory.set_preference("name", name)
         response = {"status": "success", "message": f"Understood. I will call you {name} from now on."}
         
+    # Casual Acknowledgement
+    elif cmd in ["ok", "okei", "okay", "sure", "fine", "yeah", "yep", "yes", "affirmative", "alright", "roger that", "cool"]:
+        response = {"status": "success", "message": "Got it!, Arish"}
+
     elif "who are you" in cmd:
         response = {"status": "success", "message": "I am JARVIS, your Personal AI Operating System."}
         

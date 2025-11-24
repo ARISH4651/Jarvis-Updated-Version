@@ -1,16 +1,20 @@
+// JARVIS HUD Frontend Script
+// ------------------------------------------------------------
+// This file implements the interactive HUD, including visual effects,
+// a friendly male‑voice TTS engine, command handling, and system stats.
+// ------------------------------------------------------------
+
 document.addEventListener('DOMContentLoaded', () => {
-    // --- PARTICLE SYSTEM ---
+    // ------------------- Particle System -------------------
     const canvas = document.getElementById('particles-canvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
-
-    function resizeCanvas() {
+    const resizeCanvas = () => {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-    }
+    };
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
-
     class Particle {
         constructor() {
             this.x = Math.random() * canvas.width;
@@ -35,45 +39,37 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.fill();
         }
     }
-
-    function initParticles() {
-        for (let i = 0; i < 50; i++) {
-            particles.push(new Particle());
-        }
-    }
-
-    function animateParticles() {
+    const initParticles = () => {
+        for (let i = 0; i < 50; i++) particles.push(new Particle());
+    };
+    const animateParticles = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        particles.forEach(p => {
-            p.update();
-            p.draw();
-        });
+        particles.forEach(p => { p.update(); p.draw(); });
         requestAnimationFrame(animateParticles);
-    }
+    };
     initParticles();
     animateParticles();
 
-    // --- CLOCK ---
-    function updateClock() {
+    // ------------------- Clock -------------------
+    const updateClock = () => {
         const now = new Date();
         document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', { hour12: false });
         const options = { month: 'short', day: 'numeric', weekday: 'long' };
         document.getElementById('date').textContent = now.toLocaleDateString('en-US', options).toUpperCase();
-    }
+    };
     setInterval(updateClock, 1000);
     updateClock();
 
-    // --- UI ELEMENTS ---
+    // ------------------- UI Elements -------------------
     const input = document.getElementById('command-input');
-    const sendBtn = document.getElementById('send-btn');
     const chatHistory = document.getElementById('chat-history');
     const voiceBtn = document.getElementById('voice-btn');
     const systemOverlay = document.getElementById('system-overlay');
     const notificationZone = document.getElementById('notification-zone');
     const waveform = document.getElementById('voice-waveform');
 
-    // --- NOTIFICATIONS ---
-    function showNotification(text) {
+    // ------------------- Notifications -------------------
+    const showNotification = (text) => {
         notificationZone.innerHTML = '';
         const notif = document.createElement('div');
         notif.className = 'notification';
@@ -83,60 +79,73 @@ document.addEventListener('DOMContentLoaded', () => {
             notif.style.opacity = '0';
             setTimeout(() => notif.remove(), 500);
         }, 3000);
-    }
+    };
 
-    function addMessage(text, sender) {
+    // ------------------- Chat Helper -------------------
+    const addMessage = (text, sender) => {
         const msgDiv = document.createElement('div');
         msgDiv.className = `message ${sender}`;
         msgDiv.textContent = sender === 'ai' ? `JARVIS: ${text}` : `BOSS: ${text}`;
         chatHistory.appendChild(msgDiv);
         chatHistory.scrollTop = chatHistory.scrollHeight;
-    }
+    };
 
-    // --- TTS & VOICE VISUALIZER ---
-    function speak(text) {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            const voices = window.speechSynthesis.getVoices();
-            const preferredVoice = voices.find(v => v.name.includes("David") || v.lang === "en-US");
-            if (preferredVoice) utterance.voice = preferredVoice;
+    // ------------------- TTS (Male Voice) -------------------
+    const speak = (text) => {
+        if (!('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        const voices = window.speechSynthesis.getVoices();
+        const maleNames = [
+            'David', 'Mike', 'Alex', 'Brian', 'James', 'John', 'Robert',
+            'William', 'George', 'Mark', 'Paul', 'Tom', 'Richard', 'Daniel',
+            'Matthew', 'Andrew', 'Steven', 'Kevin', 'Jason', 'Eric', 'Ryan',
+            'Scott', 'Anthony', 'Patrick', 'Benjamin', 'Samuel', 'Gregory',
+            'Larry', 'Frank', 'Jonathan', 'Justin', 'Aaron', 'Kyle', 'Dylan',
+            'Ethan', 'Jordan', 'Tyler', 'Chad', 'Travis', 'Cameron', 'Derek',
+            'Shawn', 'Phillip', 'Neil', 'Gordon', 'Harold', 'Leonard', 'Michael',
+            'Victor', 'Wesley', 'Zack', 'Zachary', 'Zane', 'Zeke'
+        ];
+        // Prefer male English voices; fallback to any English voice.
+        const preferred = voices.find(v => maleNames.some(name => v.name.includes(name)) && v.lang.startsWith('en'))
+            || voices.find(v => v.lang.startsWith('en'));
+        if (preferred) utterance.voice = preferred;
+        // Friendly, natural parameters
+        utterance.pitch = 1.0;
+        utterance.rate = 0.95;
+        utterance.volume = 1.0;
+        utterance.onstart = () => waveform.classList.add('active');
+        utterance.onend = () => waveform.classList.remove('active');
+        window.speechSynthesis.speak(utterance);
+    };
 
-            utterance.onstart = () => waveform.classList.add('active');
-            utterance.onend = () => waveform.classList.remove('active');
-
-            window.speechSynthesis.speak(utterance);
-        }
-    }
-
-    // --- COMMAND HANDLING ---
-    async function handleCommand(cmd) {
+    // ------------------- Command Handling -------------------
+    const handleCommand = async (cmd) => {
         const command = cmd.toLowerCase().trim();
-
-        if (command.includes("show system") || command.includes("system performance") || command.includes("status")) {
+        // System overlay commands
+        if (command.includes('show system') || command.includes('system performance') || command.includes('status')) {
             systemOverlay.classList.remove('hidden');
-            speak("Displaying system diagnostics.");
-            showNotification("SYSTEM OVERLAY ACTIVE");
+            speak('Displaying system diagnostics.');
+            showNotification('SYSTEM OVERLAY ACTIVE');
             return;
         }
-        if (command.includes("hide system") || command.includes("close system")) {
+        if (command.includes('hide system') || command.includes('close system')) {
             systemOverlay.classList.add('hidden');
-            speak("Closing diagnostics.");
+            speak('Closing diagnostics.');
             return;
         }
-
+        // General commands – forward to backend
         try {
             const response = await fetch('http://localhost:5000/command', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ command: command })
+                body: JSON.stringify({ command })
             });
             const data = await response.json();
-
             if (data.status === 'success') {
                 addMessage(data.message, 'ai');
                 speak(data.message);
-                if (data.data && Array.isArray(data.data)) {
+                if (data.data && Array.isArray(data.data) && data.data.length) {
                     const top = data.data[0];
                     addMessage(`Result: ${top.title}`, 'ai');
                 }
@@ -144,118 +153,115 @@ document.addEventListener('DOMContentLoaded', () => {
                 addMessage(data.message, 'ai');
                 speak(data.message);
             }
-        } catch (error) {
-            addMessage("Neural Link Offline.", 'ai');
-            showNotification("CONNECTION ERROR");
+        } catch (e) {
+            addMessage('Neural Link Offline.', 'ai');
+            showNotification('CONNECTION ERROR');
         }
-    }
+    };
 
-    function sendCommand() {
+    const sendCommand = () => {
         const text = input.value.trim();
         if (text) {
             addMessage(text, 'user');
             input.value = '';
             handleCommand(text);
         }
-    }
+    };
+    input.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendCommand(); });
 
-    input.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendCommand();
-    });
-
-    // --- VOICE RECOGNITION ---
+    // ------------------- Voice Recognition -------------------
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
         const recognition = new SpeechRecognition();
         recognition.lang = 'en-US';
-
         voiceBtn.addEventListener('click', () => {
             recognition.start();
             voiceBtn.classList.add('listening');
-            showNotification("LISTENING...");
+            showNotification('LISTENING...');
         });
-
         recognition.onresult = (event) => {
             const text = event.results[0][0].transcript;
             input.value = text;
             voiceBtn.classList.remove('listening');
             sendCommand();
         };
-
-        recognition.onend = () => {
-            voiceBtn.classList.remove('listening');
-        };
+        recognition.onend = () => voiceBtn.classList.remove('listening');
     }
 
-    // --- SYSTEM STATS & GRAPHS ---
+    // ------------------- System Stats -------------------
     const cpuHistory = new Array(20).fill(0);
-
-    function updateGraph(history, elementId) {
+    const updateGraph = (history, elementId) => {
         const svg = document.getElementById(elementId).parentElement;
         const width = svg.clientWidth;
         const height = svg.clientHeight;
         const step = width / (history.length - 1);
-
         const points = history.map((val, i) => {
             const x = i * step;
-            const y = height - (val / 100 * height);
+            const y = height - (val / 100) * height;
             return `${x},${y}`;
         }).join(' ');
-
         document.getElementById(elementId).setAttribute('points', points);
-    }
-
-    function getColorClass(value) {
+    };
+    const getColorClass = (value) => {
         if (value < 50) return 'load-low';
         if (value < 80) return 'load-med';
         return 'load-high';
-    }
-
-    async function fetchStats() {
+    };
+    const fetchStats = async () => {
         try {
             const response = await fetch('http://localhost:5000/stats');
             const data = await response.json();
-
-            // Jitter effect for realism
             const jitter = (Math.random() - 0.5) * 2;
             const cpuVal = Math.min(100, Math.max(0, data.cpu + jitter));
-
-            // Update CPU
+            // CPU
             const cpuBar = document.getElementById('cpu-bar');
             cpuBar.style.width = `${cpuVal}%`;
             cpuBar.className = `bar ${getColorClass(cpuVal)}`;
             document.getElementById('cpu-val').textContent = `${Math.round(cpuVal)}%`;
-
-            // Update Graph
+            // Graph
             cpuHistory.shift();
             cpuHistory.push(cpuVal);
             updateGraph(cpuHistory, 'cpu-polyline');
-
-            // Update RAM
+            // RAM
             const ramBar = document.getElementById('ram-bar');
             ramBar.style.width = `${data.ram.percent}%`;
             ramBar.className = `bar ${getColorClass(data.ram.percent)}`;
             document.getElementById('ram-val').textContent = `${data.ram.percent}%`;
-
-            // Update GPU
+            // GPU
             if (data.gpu) {
                 const gpuBar = document.getElementById('gpu-bar');
                 gpuBar.style.width = `${data.gpu.load}%`;
                 gpuBar.className = `bar ${getColorClass(data.gpu.load)}`;
                 document.getElementById('gpu-val').textContent = `${data.gpu.temperature}°C`;
             }
-
-            // Core Pulse
+            // Core pulse
             document.getElementById('core-text').textContent = Math.floor(cpuVal);
-
         } catch (e) {
-            // Silent fail
+            // silent fail
         }
-    }
-    setInterval(fetchStats, 1000); // Faster polling for smooth graph
+    };
+    setInterval(fetchStats, 1000);
 
-    setTimeout(() => {
-        showNotification("SYSTEM ONLINE");
-        speak("Systems initialized.");
+    // ------------------- Personalized Greeting -------------------
+    setTimeout(async () => {
+        try {
+            const response = await fetch('/command', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ command: 'get user name' })
+            });
+            const data = await response.json();
+            let userName = 'Sir';
+            if (data.message && data.message.toLowerCase().includes('arish')) userName = 'Arish';
+            const greeting = `Hey ${userName}, what can I do for you today?`;
+            showNotification('SYSTEM ONLINE');
+            addMessage(greeting, 'ai');
+            speak(greeting);
+        } catch (e) {
+            const greeting = 'Hey Arish, what can I do for you today?';
+            showNotification('SYSTEM ONLINE');
+            addMessage(greeting, 'ai');
+            speak(greeting);
+        }
     }, 1000);
 });
